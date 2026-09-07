@@ -1,5 +1,5 @@
 from fastapi import FastAPI,HTTPException,status
-
+from pydantic import BaseModel
 # a static memory for storing app's data
 
 memory=[{"id":1,"title":"get a job","done":False},{"id":2,"title":"get a house","done":False},{"id":3,"title":"buy a car","done":True}]
@@ -41,4 +41,32 @@ def get_task(id:int):
             return task
     raise HTTPException(status_code=404,detail=f"task {id} not found 404")  # raise an error message when the task is not present in memory
 
+# define a basic templete to insure input suffice all requirements 
+
+class taskcreate(BaseModel):
+
+    title:str
+
+
+# define a functionality of adding a new task to the memory list 
+
+@app.post("/tasks",status_code=status.HTTP_201_CREATED,description="Add a new task")
+
+def add_task(task:taskcreate):
+
+    global next_id  # call global id variable  
+
+    clean_title=task.title.strip()  # trim the inputed title from any extra spaces at the start or end
+
+    if not clean_title:             # insure that the title is still present after trimming
+
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail="you should provide the title of the task to be accepted !")             # raise an error if the title was invalid in any case
+
+    new_task={'id':next_id,"title":clean_title,"done":False}
+
+    next_id+=1                                                                 
+                                                            # adds the new task to memory list
+    memory.append(new_task)
+
+    return new_task
 
