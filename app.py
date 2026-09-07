@@ -5,7 +5,7 @@ from typing import Optional
 
 # a static memory for storing app's data
 
-memory=[{"id":1,"title":"get a job","done":False},{{"id":1,"title":"get a house","done":False}},{{"id":3,"title":"buy a car","done":True}}]
+memory=[{"id":1,"title":"get a job","done":False},{"id":1,"title":"get a house","done":False},{"id":3,"title":"buy a car","done":True}]
 
 #initialize a global variable to represent id value
 next_id=4
