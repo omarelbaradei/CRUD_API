@@ -1,5 +1,6 @@
 from fastapi import FastAPI,HTTPException,status
 from pydantic import BaseModel
+from typing import Optional
 # a static memory for storing app's data
 
 memory=[{"id":1,"title":"get a job","done":False},{"id":2,"title":"get a house","done":False},{"id":3,"title":"buy a car","done":True}]
@@ -69,4 +70,55 @@ def add_task(task:taskcreate):
     memory.append(new_task)
 
     return new_task
+
+# define a basic templete to insure input suffice all requirements
+
+class taskupdate(BaseModel):
+    title:Optional[str]=None
+    done:Optional[bool]=None
+
+
+# define a functionality of updating existing task's title or done status 
+
+@app.put("/tasks/{task_id}",status_code=status.HTTP_201_CREATED,description="Update exciting tasks")
+def update_task(task_id:int,task:taskupdate):
+
+    update=None    # a variable refers to updated task
+
+    for cell in memory:
+
+        if cell["id"]==task_id:
+
+            update=cell
+
+            break   
+
+    if update is None:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"invalid id")
+
+    if task.title is None and  task.done is None:
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail="no title or done entered")
+
+
+    if task.title is not None:
+        clean_title=task.title.strip()
+        if not clean_title: 
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail="title not provided")
+        update["title"]=clean_title
+
+    if task.done is not None:
+        update["done"]=task.done
+
+    return update
+
+
+# define a functionality to delete a certain task in memory
+
+@app.delete("/tasks/{task_id}",status_code=status.HTTP_204_NO_CONTENT,description="Delete exicting tasks")
+def delete_task(task_id:int):
+    for i,task in enumerate(memory):
+        if task["id"]==task_id:
+            memory.pop(i)
+            return 
+    raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="invalid id")  
 
